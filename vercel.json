@@ -9,11 +9,5 @@
       "source": "/(.*)",
       "destination": "/public/$1"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/refresh",
-      "schedule": "0 * * * *"
-    }
   ]
 }
