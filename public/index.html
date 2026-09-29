@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIH 2026 Problem Statement Ranker | Software Track (Lowest Ideas First)</title>
+  <meta name="description" content="Live ranking of SIH 2026 Software Problem Statements sorted by Submitted Idea Count ascending to find low competition problem statements.">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <!-- Main Container -->
+  <div class="app-wrapper">
+    <!-- Navbar / Header -->
+    <header class="navbar">
+      <div class="nav-left">
+        <div class="brand-badge">
+          <span class="pulse-dot"></span>
+          <span class="badge-text">SIH 2026 LIVE RANKER</span>
+        </div>
+        <h1 class="nav-title">Smart India Hackathon 2026</h1>
+        <p class="nav-subtitle">
+          <span class="badge category-badge"><i class="fa-solid fa-code"></i> Software Category Only</span>
+          <span class="sort-badge"><i class="fa-solid fa-arrow-up-short-wide"></i> Ranked: Least Submissions First</span>
+        </p>
+      </div>
+
+      <div class="nav-right">
+        <!-- Live Sync Status -->
+        <div class="sync-status-card" id="syncStatusCard">
+          <div class="sync-indicator">
+            <span class="live-indicator" id="liveDot"></span>
+            <div class="sync-info">
+              <span class="sync-label" id="syncLabel">SIH.gov.in Live Connected</span>
+              <span class="sync-time" id="lastUpdatedTime">Syncing...</span>
+            </div>
+          </div>
+          <button id="refreshBtn" class="btn btn-refresh" title="Fetch fresh data from SIH main website">
+            <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i>
+            <span>Sync SIH Data</span>
+          </button>
+        </div>
+
+        <!-- Shortlist Nav Button -->
+        <button id="openShortlistBtn" class="btn btn-outline shortlist-nav-btn">
+          <i class="fa-solid fa-star text-amber"></i>
+          <span>Starred PS</span>
+          <span class="badge-pill" id="shortlistCount">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats & Intelligence Row -->
+    <section class="metrics-grid">
+      <!-- Card 1: Top Opportunity (Rank #1) -->
+      <div class="metric-card metric-card-gold" id="cardRank1">
+        <div class="metric-icon"><i class="fa-solid fa-trophy"></i></div>
+        <div class="metric-content">
+          <div class="metric-tag">Lowest Competition (Rank #1)</div>
+          <div class="metric-value" id="statRank1PS">SIH26116</div>
+          <div class="metric-desc" id="statRank1Desc">46 / 500 ideas submitted</div>
+        </div>
+      </div>
+
+      <!-- Card 2: Low Competition Pool -->
+      <div class="metric-card metric-card-emerald">
+        <div class="metric-icon"><i class="fa-solid fa-leaf"></i></div>
+        <div class="metric-content">
+          <div class="metric-tag">Prime Opportunities (&lt;100 Ideas)</div>
+          <div class="metric-value text-emerald" id="statLowComp">--</div>
+          <div class="metric-desc">High chance of shortlisting</div>
+        </div>
+      </div>
+
+      <!-- Card 3: Total Software PS -->
+      <div class="metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-laptop-code"></i></div>
+        <div class="metric-content">
+          <div class="metric-tag">Total Software Statements</div>
+          <div class="metric-value" id="statTotalSoftware">182</div>
+          <div class="metric-desc">Out of 240 total SIH statements</div>
+        </div>
+      </div>
+
+      <!-- Card 4: Average Submissions -->
+      <div class="metric-card">
+        <div class="metric-icon"><i class="fa-solid fa-chart-pie"></i></div>
+        <div class="metric-content">
+          <div class="metric-tag">Average Submissions</div>
+          <div class="metric-value" id="statAvgSubmissions">--</div>
+          <div class="metric-desc">Per problem statement</div>
+        </div>
+      </div>
+
+      <!-- Card 5: Full / Capped PS -->
+      <div class="metric-card metric-card-rose">
+        <div class="metric-icon"><i class="fa-solid fa-lock"></i></div>
+        <div class="metric-content">
+          <div class="metric-tag">Capped (500/500 Maxed)</div>
+          <div class="metric-value text-rose" id="statCappedCount">--</div>
+          <div class="metric-desc">Max submission limit reached</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters & Control Toolbar -->
+    <section class="controls-panel">
+      <!-- Search and Quick Category -->
+      <div class="controls-top">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="searchInput" placeholder="Search by PS Number, Title keywords, Ministry, Organization, or Domain..." autocomplete="off">
+          <button id="clearSearchBtn" class="clear-search-btn" title="Clear search" style="display: none;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="category-toggle-group">
+          <button class="cat-toggle active" data-category="software">
+            <i class="fa-solid fa-code"></i> Software (<span id="catSoftCount">182</span>)
+          </button>
+          <button class="cat-toggle" data-category="hardware">
+            <i class="fa-solid fa-microchip"></i> Hardware (<span id="catHardCount">58</span>)
+          </button>
+          <button class="cat-toggle" data-category="all">
+            <i class="fa-solid fa-list-check"></i> All PS (240)
+          </button>
+        </div>
+      </div>
+
+      <!-- Secondary Filters Bar -->
+      <div class="controls-bottom">
+        <div class="filter-item">
+          <label><i class="fa-solid fa-layer-group"></i> Theme</label>
+          <select id="themeSelect">
+            <option value="all">All Themes (Any)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label><i class="fa-solid fa-building-columns"></i> Organization / Ministry</label>
+          <select id="orgSelect">
+            <option value="all">All Organizations (Any)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label><i class="fa-solid fa-gauge-high"></i> Competition Level</label>
+          <select id="competitionSelect">
+            <option value="all">All Competition Levels</option>
+            <option value="very-low">🟢 Very Low (&lt; 100 Ideas)</option>
+            <option value="moderate">🟡 Moderate (100 - 249 Ideas)</option>
+            <option value="high">🟠 High (250 - 499 Ideas)</option>
+            <option value="capped">🔴 Capped (500/500 Ideas)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label><i class="fa-solid fa-arrow-down-wide-short"></i> Sort Order</label>
+          <select id="sortSelect">
+            <option value="submittedCount-asc">⚡ Least Ideas First (Rank #1 Top)</option>
+            <option value="submittedCount-desc">🔥 Most Ideas First (Highest Competition)</option>
+            <option value="psNumber-asc">🔢 PS Number (Ascending)</option>
+            <option value="title-asc">🔤 Title (A to Z)</option>
+            <option value="organization-asc">🏛️ Organization (A to Z)</option>
+          </select>
+        </div>
+
+        <div class="view-and-export">
+          <div class="view-toggle">
+            <button id="tableViewBtn" class="btn-icon active" title="Table View">
+              <i class="fa-solid fa-table-list"></i>
+            </button>
+            <button id="gridViewBtn" class="btn-icon" title="Card Grid View">
+              <i class="fa-solid fa-grip"></i>
+            </button>
+          </div>
+          <button id="exportCsvBtn" class="btn btn-outline" title="Export current list to CSV">
+            <i class="fa-solid fa-file-csv"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Filter Pills / Tags -->
+      <div class="quick-tags" id="quickTagsContainer">
+        <span class="tag-label">Quick Filters:</span>
+        <button class="quick-tag" data-action="top20">🏆 Top 20 Lowest Submissions</button>
+        <button class="quick-tag" data-action="under100">🎯 Under 100 Ideas</button>
+        <button class="quick-tag" data-action="starred">⭐ Starred Only</button>
+        <button class="quick-tag" data-action="withMedia">🎥 With YouTube/Dataset</button>
+        <button class="quick-tag reset-tag" id="resetFiltersBtn"><i class="fa-solid fa-rotate-left"></i> Reset All</button>
+        <span class="active-count-label" id="resultsCountLabel">Showing 182 problem statements</span>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Loading State -->
+      <div class="loading-state" id="loadingState" style="display: none;">
+        <div class="spinner-large"></div>
+        <h3>Fetching Live SIH Problem Statements...</h3>
+        <p>Parsing submission counts and ranking in ascending order</p>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon"><i class="fa-solid fa-filter-circle-xmark"></i></div>
+        <h3>No matching problem statements found</h3>
+        <p>Try adjusting your search query or reset the filters to see results.</p>
+        <button class="btn btn-primary" onclick="window.resetAllFilters()">Reset Filters</button>
+      </div>
+
+      <!-- Table View Container -->
+      <div class="table-container" id="tableView">
+        <table class="ps-table">
+          <thead>
+            <tr>
+              <th style="width: 75px;" class="text-center">Rank</th>
+              <th style="width: 140px;">PS Number</th>
+              <th style="width: 220px;">Submitted Ideas (Competition)</th>
+              <th>Problem Statement Title &amp; Details</th>
+              <th style="width: 200px;">Organization</th>
+              <th style="width: 160px;">Theme</th>
+              <th style="width: 110px;" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="psTableBody">
+            <!-- Dynamic rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card Grid View Container -->
+      <div class="grid-container" id="gridView" style="display: none;">
+        <div class="cards-grid" id="psCardsGrid">
+          <!-- Dynamic cards will be inserted here -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <p><strong>SIH 2026 Problem Statement Ranker</strong> • Designed for hackathon teams to identify high-probability, low-competition software problem statements.</p>
+        <p class="footer-note">Data scraped &amp; synced directly from the official portal <a href="https://sih.gov.in/sih2026PS" target="_blank" rel="noopener">https://sih.gov.in/sih2026PS</a>.</p>
+      </div>
+      <div class="footer-right">
+        <a href="https://sih.gov.in/letters/2026/SIH%202026%20Guidelines.pdf" target="_blank" class="footer-link"><i class="fa-regular fa-file-pdf"></i> Guidelines PDF</a>
+        <a href="https://sih.gov.in/letters/2026/SIH2026-IDEA-Presentation-Format.pptx" target="_blank" class="footer-link"><i class="fa-solid fa-file-powerpoint"></i> Idea PPT Format</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Detail Modal / Drawer -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-badges">
+            <span class="rank-badge-large" id="modalRank">Rank #1</span>
+            <span class="ps-number-badge" id="modalPSNumber">SIH26001</span>
+            <span class="category-pill" id="modalCategory">Software</span>
+            <span class="competition-pill" id="modalCompetition">Very Low Competition</span>
+          </div>
+          <h2 id="modalTitle">Problem Statement Title</h2>
+        </div>
+        <button class="modal-close" id="modalCloseBtn" title="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Submission Stats Bar -->
+        <div class="modal-submission-banner">
+          <div class="sub-stat">
+            <span class="sub-label">Submitted Ideas</span>
+            <span class="sub-val" id="modalSubmissionCount">46</span>
+          </div>
+          <div class="sub-stat">
+            <span class="sub-label">Max Capacity Limit</span>
+            <span class="sub-val" id="modalMaxCapacity">500</span>
+          </div>
+          <div class="sub-stat">
+            <span class="sub-label">Capacity Filled</span>
+            <span class="sub-val" id="modalCapacityPercent">9.2%</span>
+          </div>
+          <div class="sub-progress-wrap">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="modalProgressBar" style="width: 9.2%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meta Details Grid -->
+        <div class="modal-meta-grid">
+          <div class="meta-card">
+            <span class="meta-label"><i class="fa-solid fa-building-columns"></i> Organization / Ministry</span>
+            <span class="meta-value" id="modalOrganization">Ministry of Earth Sciences</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label"><i class="fa-solid fa-layer-group"></i> Theme</span>
+            <span class="meta-value" id="modalTheme">Disaster Management</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label"><i class="fa-regular fa-calendar"></i> Submission Deadline</span>
+            <span class="meta-value" id="modalDeadline">30 September 2026</span>
+          </div>
+          <div class="meta-card" id="modalDomainBox">
+            <span class="meta-label"><i class="fa-solid fa-cubes"></i> Domain / Bucket</span>
+            <span class="meta-value" id="modalDomain">Software / AI</span>
+          </div>
+        </div>
+
+        <!-- Full Description Section -->
+        <div class="modal-section">
+          <h3><i class="fa-solid fa-align-left"></i> Problem Statement Description</h3>
+          <div class="modal-description-box" id="modalDescription">
+            Loading description...
+          </div>
+        </div>
+
+        <!-- External Resources / Links Section -->
+        <div class="modal-section" id="modalLinksSection">
+          <h3><i class="fa-solid fa-paperclip"></i> References &amp; Attachments</h3>
+          <div class="modal-links-grid" id="modalLinksGrid">
+            <!-- Dynamic Links -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="modalCopyPsBtn">
+          <i class="fa-regular fa-copy"></i> Copy PS Number
+        </button>
+        <button class="btn btn-outline" id="modalStarBtn">
+          <i class="fa-regular fa-star"></i> Star / Shortlist
+        </button>
+        <a href="https://sih.gov.in/signin" target="_blank" rel="noopener" class="btn btn-primary">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Submit Idea on SIH Portal
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Starred / Shortlist Drawer -->
+  <div class="drawer-overlay" id="shortlistDrawer">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <i class="fa-solid fa-star text-amber"></i>
+          <h2>My Team Shortlist</h2>
+          <span class="badge-pill" id="drawerShortlistCount">0</span>
+        </div>
+        <button class="drawer-close" id="drawerCloseBtn">&times;</button>
+      </div>
+
+      <div class="drawer-body" id="shortlistItemsContainer">
+        <!-- Shortlist items -->
+      </div>
+
+      <div class="drawer-footer">
+        <button class="btn btn-outline" id="exportShortlistCsvBtn">
+          <i class="fa-solid fa-file-csv"></i> Export Shortlist (CSV)
+        </button>
+        <button class="btn btn-danger-outline" id="clearShortlistBtn">
+          <i class="fa-solid fa-trash-can"></i> Clear All
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
